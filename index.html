@@ -20,7 +20,6 @@
   body {
     font-family: ui-monospace, "SF Mono", "Menlo", "Roboto Mono", "Courier New", monospace;
     background: var(--page); color: var(--ink);
-    position: fixed; top: 0; left: 0; right: 0;
     display: flex; flex-direction: column; height: 100vh; overflow: hidden;
     user-select: none; -webkit-font-smoothing: antialiased;
   }
@@ -36,7 +35,7 @@
 
   /* Scroll stage — only the receipt scrolls here */
   .stage { flex: 1 1 auto; min-height: 0; overflow-y: auto; -webkit-overflow-scrolling: touch;
-    display: flex; padding: 20px 16px 16px; }
+    display: flex; padding: 20px 16px 104px; }
   .wrap { margin: auto auto 0; width: 100%; max-width: 460px; }
 
   /* Receipt paper */
@@ -110,11 +109,12 @@
   .quote { text-align: center; font-family: inherit; font-style: normal; font-weight: 400; font-size: 12px; letter-spacing: .5px; color: var(--ink); margin: 12px 6px 0; line-height: 1.4; }
   .copy { text-align: center; font-size: 11px; color: var(--muted); letter-spacing: 3px; margin-top: 11px; }
 
-  /* Input bar — bottom of the column; stays put above the keyboard */
+  /* Input bar — fixed to screen bottom; rides just above the keyboard */
   .inputbar {
-    flex: 0 0 auto; display: flex; gap: 10px; align-items: center;
+    position: fixed; left: 0; right: 0; bottom: 0; z-index: 10;
+    display: flex; gap: 10px; align-items: center;
     padding: 12px 16px calc(14px + env(safe-area-inset-bottom));
-    background: var(--page);
+    background: var(--page); will-change: transform;
   }
   .price-field {
     flex: 1; min-width: 0; height: 54px; display: flex; align-items: center; gap: 8px;
@@ -372,13 +372,24 @@
     if (!items.length || confirm("기록을 전부 지울까요?")) { items = []; render(); closeSettings(); }
   });
 
-  // Shrink the app to the visible area so the input bar stays fixed above the keyboard
+  // Input bar rides above the keyboard; the receipt scrolls underneath
+  var $bar = document.querySelector(".inputbar");
   var $stage = document.querySelector(".stage");
   var vv = window.visualViewport;
-  function fit() { document.body.style.height = (vv ? vv.height : window.innerHeight) + "px"; }
-  if (vv) vv.addEventListener("resize", fit);
-  window.addEventListener("orientationchange", function () { setTimeout(fit, 250); });
-  fit();
+  function positionBar() {
+    if (!vv) return;
+    var gap = Math.max(0, window.innerHeight - vv.height - vv.offsetTop);
+    $bar.style.transform = gap > 0 ? "translateY(" + (-gap) + "px)" : "";
+    // keep the receipt resting just above the input bar
+    $stage.style.paddingBottom = ($bar.offsetHeight + 12 + gap) + "px";
+  }
+  if (vv) {
+    vv.addEventListener("resize", positionBar);
+    vv.addEventListener("scroll", positionBar);
+  }
+  $price.addEventListener("focus", function () { setTimeout(positionBar, 60); });
+  window.addEventListener("orientationchange", function () { setTimeout(positionBar, 250); });
+  positionBar();
 
   // Double-tap the receipt (empty area) to dismiss the keyboard
   var lastTap = 0;
