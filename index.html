@@ -33,9 +33,9 @@
   }
   .gear:active { transform: scale(.92); }
 
-  /* Scroll stage — centers the receipt + input group */
+  /* Scroll stage — only the receipt scrolls here */
   .stage { flex: 1 1 auto; min-height: 0; overflow-y: auto; -webkit-overflow-scrolling: touch;
-    display: flex; padding: 20px 16px; }
+    display: flex; padding: 20px 16px 104px; }
   .wrap { margin: auto; width: 100%; max-width: 460px; }
 
   /* Receipt paper */
@@ -109,8 +109,13 @@
   .quote { text-align: center; font-family: inherit; font-style: normal; font-weight: 400; font-size: 12px; letter-spacing: .5px; color: var(--ink); margin: 12px 6px 0; line-height: 1.4; }
   .copy { text-align: center; font-size: 11px; color: var(--muted); letter-spacing: 3px; margin-top: 11px; }
 
-  /* Input bar (unified tone, directly under receipt) */
-  .inputbar { display: flex; gap: 10px; align-items: center; margin-top: 14px; }
+  /* Input bar — fixed to the screen bottom; rises above the keyboard via JS */
+  .inputbar {
+    position: fixed; left: 0; right: 0; bottom: 0; z-index: 10;
+    display: flex; gap: 10px; align-items: center;
+    padding: 12px 16px calc(14px + env(safe-area-inset-bottom));
+    background: var(--page); will-change: transform;
+  }
   .price-field {
     flex: 1; min-width: 0; height: 54px; display: flex; align-items: center; gap: 8px;
     background: #fff; border-radius: 14px; padding: 0 18px; box-shadow: 0 6px 16px rgba(0,0,0,.06);
@@ -198,8 +203,10 @@
       <div class="quote">Trust, but verify the total.</div>
       <div class="copy">*** CUSTOMER COPY ***</div>
       </div>
+    </div>
+  </div>
 
-      <form class="inputbar" id="form" autocomplete="off">
+  <form class="inputbar" id="form" autocomplete="off">
     <div class="price-field">
       <span class="cur" id="curBadge">฿</span>
       <input id="price" type="text" inputmode="decimal" placeholder="가격 입력" />
@@ -208,9 +215,7 @@
       <svg viewBox="0 0 24 24" width="17" height="17" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>
       추가
     </button>
-      </form>
-    </div>
-  </div>
+  </form>
 
   <!-- Settings -->
   <div class="overlay" id="overlay">
@@ -362,8 +367,28 @@
     if (!items.length || confirm("기록을 전부 지울까요?")) { items = []; render(); closeSettings(); }
   });
 
+  // Keep the input bar glued to the top of the on-screen keyboard
+  var $bar = document.querySelector(".inputbar");
+  var vv = window.visualViewport;
+  function positionBar() {
+    if (!vv) return;
+    var gap = Math.max(0, window.innerHeight - vv.height - vv.offsetTop);
+    $bar.style.transform = gap > 0 ? "translateY(" + (-gap) + "px)" : "";
+  }
+  if (vv) {
+    vv.addEventListener("resize", positionBar);
+    vv.addEventListener("scroll", positionBar);
+  }
+  $price.addEventListener("focus", function () { setTimeout(positionBar, 50); });
+
+  // Tap the receipt (empty area) to dismiss the keyboard
+  document.querySelector(".stage").addEventListener("pointerdown", function (e) {
+    if (e.target.closest("input, button")) return;
+    if (document.activeElement && document.activeElement.blur) document.activeElement.blur();
+  });
+
   render();
-  $price.focus();
+  positionBar();
 })();
 </script>
 </body>
