@@ -33,16 +33,17 @@
   }
   .gear:active { transform: scale(.92); }
 
-  /* Scroll stage — centers the receipt */
+  /* Scroll stage — centers the receipt + input group */
   .stage { flex: 1 1 auto; min-height: 0; overflow-y: auto; -webkit-overflow-scrolling: touch;
-    display: flex; justify-content: center; align-items: flex-start; padding: 26px 16px 10px; }
+    display: flex; padding: 20px 16px; }
+  .wrap { margin: auto; width: 100%; max-width: 460px; }
 
   /* Receipt paper */
   .receipt {
-    position: relative; width: 100%; max-width: 460px;
+    position: relative; width: 100%;
     background: var(--paper);
     box-shadow: 0 18px 40px rgba(40,42,36,.14);
-    padding: 30px 26px 26px;
+    padding: 30px 20px 20px;
   }
   .receipt::before, .receipt::after {
     content: ""; position: absolute; left: 0; right: 0; height: 12px;
@@ -71,17 +72,17 @@
 
   /* Item lines */
   ul#list { list-style: none; margin: 0; padding: 0; }
-  li.line { display: flex; align-items: center; gap: 8px; padding: 9px 0; font-size: 14px; font-weight: 300; letter-spacing: .5px; }
+  li.line { display: flex; align-items: center; gap: 6px; padding: 9px 0; font-size: 13px; font-weight: 300; letter-spacing: .3px; }
   li.line .code { font-weight: 300; white-space: nowrap; }
-  li.line .dots { flex: 1; min-width: 12px; border-bottom: 1px dotted var(--faint); transform: translateY(-3px); }
-  li.line .qty { display: inline-flex; align-items: center; gap: 4px; color: var(--muted); white-space: nowrap; }
+  li.line .dots { flex: 1; min-width: 10px; border-bottom: 1px dotted var(--faint); transform: translateY(-3px); }
+  li.line .qty { display: inline-flex; align-items: center; gap: 2px; color: var(--muted); white-space: nowrap; }
   li.line .qty button {
     border: none; background: none; cursor: pointer; color: var(--muted);
-    font-size: 16px; line-height: 1; padding: 2px 3px; font-family: inherit; transition: transform .12s, color .12s;
+    font-size: 16px; line-height: 1; padding: 2px 2px; font-family: inherit; transition: transform .12s, color .12s;
   }
   li.line .qty button:active { transform: scale(.8); color: var(--ink); }
-  li.line .qty .q { min-width: 24px; text-align: center; font-weight: 400; color: var(--ink); }
-  li.line .price { font-weight: 300; white-space: nowrap; min-width: 56px; text-align: right; color: var(--ink); }
+  li.line .qty .q { min-width: 20px; text-align: center; font-weight: 400; color: var(--ink); }
+  li.line .price { font-weight: 300; white-space: nowrap; min-width: 48px; text-align: right; color: var(--ink); }
   li.line .x {
     border: none; background: none; cursor: pointer; color: var(--faint); font-size: 14px;
     padding: 2px 0 2px 4px; transition: transform .12s, color .12s;
@@ -96,20 +97,20 @@
   .total .t1 .amt { font-size: 26px; font-weight: 800; letter-spacing: 1px; }
   .total .t2 { display: flex; justify-content: space-between; font-size: 12px; color: var(--muted); letter-spacing: 1px; margin-top: 8px; }
 
-  /* Barcode + footer */
+  /* Barcode + footer (compact) */
   .barcode {
-    height: 56px; margin: 30px auto 0; max-width: 70%;
+    height: 30px; margin: 15px auto 0; max-width: 60%;
     background-image: repeating-linear-gradient(90deg,
       var(--ink) 0 2px, transparent 2px 4px,
       var(--ink) 4px 5px, transparent 5px 8px,
       var(--ink) 8px 11px, transparent 11px 12px,
       var(--ink) 12px 13px, transparent 13px 16px);
   }
-  .quote { text-align: center; font-family: inherit; font-style: normal; font-weight: 400; font-size: 13px; letter-spacing: .5px; color: var(--ink); margin: 24px 6px 0; line-height: 1.5; }
-  .copy { text-align: center; font-size: 12px; color: var(--muted); letter-spacing: 3px; margin-top: 22px; }
+  .quote { text-align: center; font-family: inherit; font-style: normal; font-weight: 400; font-size: 12px; letter-spacing: .5px; color: var(--ink); margin: 12px 6px 0; line-height: 1.4; }
+  .copy { text-align: center; font-size: 11px; color: var(--muted); letter-spacing: 3px; margin-top: 11px; }
 
-  /* Input bar (unified tone) */
-  .inputbar { flex: 0 0 auto; display: flex; gap: 10px; align-items: center; padding: 12px 16px calc(16px + env(safe-area-inset-bottom)); background: var(--page); }
+  /* Input bar (unified tone, directly under receipt) */
+  .inputbar { display: flex; gap: 10px; align-items: center; margin-top: 14px; }
   .price-field {
     flex: 1; min-width: 0; height: 54px; display: flex; align-items: center; gap: 8px;
     background: #fff; border-radius: 14px; padding: 0 18px; box-shadow: 0 6px 16px rgba(0,0,0,.06);
@@ -161,7 +162,8 @@
   </button>
 
   <div class="stage">
-    <div class="receipt">
+    <div class="wrap">
+      <div class="receipt">
       <div class="store">
         <h1>THE&nbsp;CART</h1>
         <div class="meta">OPEN 24/7 • EVERYWHERE<br>내역을 기록하고 합계를 계산하세요</div>
@@ -195,10 +197,9 @@
       <div class="barcode"></div>
       <div class="quote">Trust, but verify the total.</div>
       <div class="copy">*** CUSTOMER COPY ***</div>
-    </div>
-  </div>
+      </div>
 
-  <form class="inputbar" id="form" autocomplete="off">
+      <form class="inputbar" id="form" autocomplete="off">
     <div class="price-field">
       <span class="cur" id="curBadge">฿</span>
       <input id="price" type="text" inputmode="decimal" placeholder="가격 입력" />
@@ -207,7 +208,9 @@
       <svg viewBox="0 0 24 24" width="17" height="17" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>
       추가
     </button>
-  </form>
+      </form>
+    </div>
+  </div>
 
   <!-- Settings -->
   <div class="overlay" id="overlay">
@@ -289,7 +292,7 @@
       var li = document.createElement("li");
       li.className = "line";
       li.innerHTML =
-        '<span class="code">ITEM No.' + pad(i + 1, 4) + '</span>' +
+        '<span class="code">카트 아이템 No.' + pad(i + 1, 4) + '</span>' +
         '<span class="dots"></span>' +
         '<span class="qty">' +
           '<button type="button" data-act="dec" data-i="' + i + '" aria-label="수량 줄이기">−</button>' +
