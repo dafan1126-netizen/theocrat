@@ -36,7 +36,7 @@
   /* Scroll stage — only the receipt scrolls here */
   .stage { flex: 1 1 auto; min-height: 0; overflow-y: auto; -webkit-overflow-scrolling: touch;
     display: flex; padding: 20px 16px 104px; }
-  .wrap { margin: auto; width: 100%; max-width: 460px; }
+  .wrap { margin: auto auto 0; width: 100%; max-width: 460px; }
 
   /* Receipt paper */
   .receipt {
@@ -297,7 +297,7 @@
       var li = document.createElement("li");
       li.className = "line";
       li.innerHTML =
-        '<span class="code">카트 아이템 No.' + pad(i + 1, 4) + '</span>' +
+        '<span class="code">CART ITEM No.' + pad(i + 1, 4) + '</span>' +
         '<span class="dots"></span>' +
         '<span class="qty">' +
           '<button type="button" data-act="dec" data-i="' + i + '" aria-label="수량 줄이기">−</button>' +
@@ -369,11 +369,14 @@
 
   // Keep the input bar glued to the top of the on-screen keyboard
   var $bar = document.querySelector(".inputbar");
+  var $stage = document.querySelector(".stage");
   var vv = window.visualViewport;
   function positionBar() {
     if (!vv) return;
     var gap = Math.max(0, window.innerHeight - vv.height - vv.offsetTop);
     $bar.style.transform = gap > 0 ? "translateY(" + (-gap) + "px)" : "";
+    // keep the receipt resting just above the input bar (no big empty gap)
+    $stage.style.paddingBottom = ($bar.offsetHeight + 10 + gap) + "px";
   }
   if (vv) {
     vv.addEventListener("resize", positionBar);
@@ -381,10 +384,17 @@
   }
   $price.addEventListener("focus", function () { setTimeout(positionBar, 50); });
 
-  // Tap the receipt (empty area) to dismiss the keyboard
-  document.querySelector(".stage").addEventListener("pointerdown", function (e) {
-    if (e.target.closest("input, button")) return;
-    if (document.activeElement && document.activeElement.blur) document.activeElement.blur();
+  // Double-tap the receipt (empty area) to dismiss the keyboard
+  var lastTap = 0;
+  $stage.addEventListener("pointerdown", function (e) {
+    if (e.target.closest("input, button")) { lastTap = 0; return; }
+    var now = Date.now();
+    if (now - lastTap < 320) {
+      if (document.activeElement && document.activeElement.blur) document.activeElement.blur();
+      lastTap = 0;
+    } else {
+      lastTap = now;
+    }
   });
 
   render();
